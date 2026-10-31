@@ -1,0 +1,345 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@1,400;1,700;1,900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --bg: #080808;
+  --fg: #f0ede8;
+  --orange: #ff6b1a;
+  --orange-dim: rgba(255, 107, 26, 0.12);
+  --orange-glow: rgba(255, 107, 26, 0.25);
+  --white-10: rgba(255,255,255,0.10);
+  --white-05: rgba(255,255,255,0.05);
+  --white-03: rgba(255,255,255,0.03);
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.18);
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --radius: 12px;
+  --transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Reset & Base ─────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles this */
+  color-scheme: dark;
+  /* Prevent mobile Safari from bouncing the fixed background */
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* ─── Grain Overlay ────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* ─── Scrollbar ────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,107,26,0.35); border-radius: 2px; }
+
+/* ─── Selection ────────────────────────────────────────────── */
+::selection {
+  background: rgba(255,107,26,0.3);
+  color: #fff;
+}
+
+/* ─── Ghost Serif Heading ──────────────────────────────────── */
+.ghost {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.45);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+
+main {
+  position: relative;
+  z-index: 10;
+}
+
+/* ─── Sections ────────────────────────────────────────────── */
+.section {
+  position: relative;
+  z-index: 10;
+  padding: 100px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 5vw, 48px);
+}
+
+/* ─── Hero clamp text ─────────────────────────────────────── */
+.hero-name {
+  font-size: clamp(4rem, 12vw, 10rem);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(255,255,255,0.9);
+}
+
+.hero-name-fill {
+  color: var(--fg);
+  -webkit-text-stroke: 0;
+}
+
+.hero-tag {
+  font-size: clamp(0.7rem, 1.8vw, 1rem);
+  font-family: var(--font-mono);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+
+/* ─── Section Labels ──────────────────────────────────────── */
+.label {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--orange);
+  opacity: 0.85;
+}
+
+/* ─── Orange CTA Button ───────────────────────────────────── */
+.btn-orange {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border: 1px solid var(--orange);
+  background: var(--orange-dim);
+  color: var(--orange);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition), box-shadow var(--transition);
+}
+.btn-orange:hover {
+  background: rgba(255,107,26,0.22);
+  box-shadow: 0 0 32px rgba(255,107,26,0.25);
+}
+
+/* ─── Ghost Button ────────────────────────────────────────── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border: 1px solid var(--border-hover);
+  background: var(--white-05);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition), border-color var(--transition);
+}
+.btn-ghost:hover {
+  background: var(--white-10);
+  border-color: rgba(255,255,255,0.3);
+}
+
+/* ─── Glass Card ──────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.glass-card:hover {
+  border-color: rgba(255,107,26,0.3);
+  box-shadow: 0 8px 40px rgba(255,107,26,0.08);
+}
+
+/* ─── Orange Accent Bar ───────────────────────────────────── */
+.accent-bar {
+  display: block;
+  width: 40px;
+  height: 2px;
+  background: var(--orange);
+  margin-bottom: 12px;
+}
+
+/* ─── Cursor Dot ──────────────────────────────────────────── */
+.cursor-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--orange);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  mix-blend-mode: normal;
+  transition: transform 0.1s;
+}
+
+.cursor-ring {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(255,107,26,0.5);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  transition: transform 0.12s, width 0.2s, height 0.2s, border-color 0.2s;
+}
+
+/* ─── Fade-up animation via GSAP (initial state) ──────────── */
+.fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+}
+
+/* ─── Nav ─────────────────────────────────────────────────── */
+.nav-link {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.nav-link:hover {
+  color: var(--orange);
+}
+
+/* ─── Skill pill ──────────────────────────────────────────── */
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.65);
+  background: var(--white-03);
+  transition: border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.skill-pill:hover {
+  border-color: rgba(255,107,26,0.4);
+  color: var(--orange);
+}
+
+/* ─── Timeline dot ────────────────────────────────────────── */
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--orange);
+  flex-shrink: 0;
+  position: relative;
+}
+.timeline-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,107,26,0.3);
+}
+
+/* ─── Cert grid ───────────────────────────────────────────── */
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+/* ─── Project deck ────────────────────────────────────────── */
+.project-tag {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,107,26,0.3);
+  color: rgba(255,107,26,0.9);
+  background: rgba(255,107,26,0.08);
+}
+
+/* ─── Stat Number ─────────────────────────────────────────── */
+.stat-num {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  color: var(--orange);
+  line-height: 1;
+}
+
+/* ─── Responsive helpers ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .section { padding: 70px 0; }
+  .cert-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── Bottom blur effect on sections ─────────────────────── */
+.bottom-blur {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ─── Input focus ─────────────────────────────────────────── */
+input:focus, textarea:focus {
+  outline: none;
+  border-color: rgba(255,107,26,0.5) !important;
+}
