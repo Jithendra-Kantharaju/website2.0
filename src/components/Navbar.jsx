@@ -1,191 +1,96 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { profile } from '@/data/portfolio'
+import Arrow from './Arrow'
 
-const NAV_ITEMS = [
-  { label: 'Home',     id: 'hero' },
-  { label: 'About',    id: 'about' },
-  { label: 'Journey',  id: 'journey' },
-  { label: 'Skills',   id: 'skills' },
-  { label: 'Certs',    id: 'certs' },
-  { label: 'Projects', id: 'projects' },
-  { label: 'Contact',  id: 'contact' },
-]
+const items = [['About','about'],['Experience','experience'],['Projects','projects'],['Skills','skills'],['Credentials','credentials'],['Contact','contact']]
 
 export default function Navbar() {
-  const navRef = useRef(null)
-  const [open, setOpen]         = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const [open,setOpen] = useState(false)
+  const [present,setPresent] = useState(false)
+  const [active,setActive] = useState('')
+  const toggle = useRef(null)
+  const panel = useRef(null)
+  const animation = useRef(null)
+  const instant = useRef(false)
 
-  useEffect(() => {
-    async function init() {
-      const g  = await import('gsap')
-      const st = await import('gsap/ScrollTrigger')
-      const gsap          = g.gsap || g.default
-      const ScrollTrigger = st.ScrollTrigger
-      gsap.registerPlugin(ScrollTrigger)
-
-      gsap.fromTo(navRef.current,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: 'power3.out' }
-      )
+  function changeMenu(next, immediate = false) {
+    instant.current = immediate || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (panel.current && animation.current) {
+      const current = getComputedStyle(panel.current)
+      panel.current.style.opacity = current.opacity
+      panel.current.style.transform = current.transform
+      animation.current.cancel()
     }
-    init()
-
-    const onScroll = () => setScrolled(window.scrollY > 60)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
-  const scrollTo = (id) => {
-    setOpen(false)
-    if (id === 'hero') {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      return
-    }
-    const el = document.getElementById(id)
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (next) setPresent(true)
+    else if (instant.current) setPresent(false)
+    setOpen(next)
   }
+  useEffect(()=>{
+    if (!present || !panel.current) return
+    const element = panel.current
+    if (instant.current) { element.style.opacity='1';element.style.transform='none';return }
+    const current=getComputedStyle(element)
+    animation.current = element.animate([
+      {opacity:element.style.opacity || (open ? 0 : current.opacity),transform:element.style.transform || (open?'translateY(-8px)':current.transform)},
+      {opacity:open?1:0,transform:open?'translateY(0px)':'translateY(-8px)'}
+    ],{duration:open?240:160,easing:current.getPropertyValue('--ease-drawer').trim(),fill:'forwards'})
+    animation.current.finished.then(()=>{if(!open)setPresent(false)},()=>{})
+    return ()=>animation.current?.cancel()
+  },[open,present])
 
-  return (
-    <>
-      <nav
-        ref={navRef}
-        style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0,
-          zIndex: 1000,
-          padding: '18px clamp(16px, 5vw, 48px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: scrolled ? 'rgba(8,8,8,0.85)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(20px)' : 'none',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.06)' : 'none',
-          transition: 'background 0.4s, border-color 0.4s',
-          opacity: 0,
-        }}
-      >
-        {/* Logo — also scrolls to top */}
-        <button
-          onClick={() => scrollTo('hero')}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            fontFamily: 'var(--font-mono)',
-            fontSize: '0.8rem',
-            fontWeight: 700,
-            letterSpacing: '0.12em',
-            color: 'var(--fg)',
-            display: 'flex', alignItems: 'center', gap: 8,
-          }}
-        >
-          <span style={{
-            width: 24, height: 24,
-            background: 'var(--orange)',
-            borderRadius: 4,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.7rem', fontWeight: 900, color: '#fff',
-          }}>JK</span>
-          <span style={{ color: 'rgba(255,255,255,0.7)' }}>Jithendra K.</span>
-        </button>
+  useEffect(()=>{
+    const observer=new IntersectionObserver(entries=>{
+      const visible=entries.filter(entry=>entry.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top)
+      if(visible.length)setActive(visible[0].target.id)
+    },{rootMargin:'-15% 0px -55% 0px'})
+    ;['home',...items.map(([,id])=>id)].forEach(id=>{const element=document.getElementById(id);if(element)observer.observe(element)})
+    return ()=>observer.disconnect()
+  },[])
 
-        {/* Desktop links */}
-        <div style={{ display: 'flex', gap: 28, alignItems: 'center' }}
-          className="desktop-nav">
-          {NAV_ITEMS.map(({ label, id }) => (
-            <button key={id} onClick={() => scrollTo(id)} className="nav-link">
-              {label}
-            </button>
-          ))}
-        </div>
+  useEffect(()=>{
+    if(!open)return
+    const previous=document.body.style.overflow
+    document.body.style.overflow='hidden'
+    panel.current?.querySelector('a')?.focus()
+    function keyboard(event){
+      if(event.key==='Escape'){changeMenu(false,true);toggle.current?.focus()}
+      if(event.key==='Tab'){
+        // Keyboard feedback is immediate, even if the panel was opened by touch.
+        animation.current?.finish()
+        const links=[...panel.current.querySelectorAll('a')]
+        const first=toggle.current,last=links.at(-1)
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+      }
+    }
+    const desktop=window.matchMedia('(min-width: 1024px)')
+    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)')
+    function resize(event){if(event.matches){changeMenu(false,true);const brand=document.querySelector('.brand');if(brand instanceof HTMLElement)brand.focus()}}
+    function preference(event){if(event.matches)animation.current?.finish()}
+    document.addEventListener('keydown',keyboard)
+    desktop.addEventListener('change',resize);reduced.addEventListener('change',preference)
+    return ()=>{document.body.style.overflow=previous;document.removeEventListener('keydown',keyboard);desktop.removeEventListener('change',resize);reduced.removeEventListener('change',preference)}
+  },[open])
 
-        {/* Mobile burger */}
-        <button
-          onClick={() => setOpen(o => !o)}
-          style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            display: 'none', flexDirection: 'column', gap: 5, padding: 4,
-          }}
-          className="burger-btn"
-          aria-label="Menu"
-        >
-          {[0, 1, 2].map(i => (
-            <span key={i} style={{
-              display: 'block', width: 22, height: 2,
-              background: 'var(--fg)',
-              borderRadius: 1,
-              transform: open
-                ? i === 0 ? 'rotate(45deg) translate(5px, 5px)'
-                  : i === 2 ? 'rotate(-45deg) translate(5px, -5px)'
-                  : 'scaleX(0)'
-                : 'none',
-              transition: 'transform 0.25s',
-            }} />
-          ))}
-        </button>
-      </nav>
-
-      {/* Mobile fullscreen overlay */}
-      {open && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(8,8,8,0.97)',
-          backdropFilter: 'blur(20px)',
-          zIndex: 999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 32,
-        }}>
-          {NAV_ITEMS.map(({ label, id }) => (
-            <button
-              key={id}
-              onClick={() => scrollTo(id)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: 'var(--font-serif)',
-                fontStyle: 'italic',
-                fontSize: '2.5rem',
-                fontWeight: 700,
-                color: 'var(--fg)',
-                transition: 'color 0.2s',
-              }}
-              onMouseEnter={e => e.target.style.color = 'var(--orange)'}
-              onMouseLeave={e => e.target.style.color = 'var(--fg)'}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <style>{`
-        .nav-link {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font-family: var(--font-mono);
-          font-size: 0.72rem;
-          font-weight: 500;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          color: rgba(255,255,255,0.55);
-          transition: color 0.2s;
-          padding: 4px 0;
-        }
-        .nav-link:hover {
-          color: var(--orange);
-        }
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .burger-btn  { display: flex !important; }
-        }
-        @media (min-width: 769px) {
-          .burger-btn { display: none !important; }
-        }
-      `}</style>
-    </>
-  )
+  function navigate(id,event) {
+    changeMenu(false,event.detail===0)
+    requestAnimationFrame(()=>document.getElementById(id)?.focus({preventScroll:true}))
+  }
+  return <header className="site-header">
+    <nav className="nav-shell" aria-label="Main navigation">
+      <a className="brand" href="#home" onClick={event=>navigate('home',event)} aria-label="Jithendra Kantharaju, home"><span className="brand-mark">jk<span>.</span></span><span className="brand-name">Jithendra K.</span></a>
+      <div className="desktop-nav">{items.slice(0,5).map(([label,id])=><a key={id} href={'#'+id} aria-current={active===id?'location':undefined}>{label}<span className="nav-indicator" aria-hidden="true" /></a>)}</div>
+      <a className="nav-contact" href={'mailto:'+profile.email}>Let’s talk <Arrow diagonal /></a>
+      <button ref={toggle} className="menu-toggle" aria-label={open?'Close navigation menu':'Open navigation menu'} aria-expanded={open} aria-controls={present?'mobile-navigation':undefined} onClick={event=>changeMenu(!open,event.detail===0)}>
+        <span className={open?'menu-line is-open':'menu-line'} /><span className={open?'menu-line is-open':'menu-line'} />
+      </button>
+    </nav>
+    {present&&<div className="mobile-navigation" id="mobile-navigation" ref={panel} inert={!open} aria-hidden={!open}>
+      <p className="eyebrow">Navigation</p>
+      {items.map(([label,id],index)=><a key={id} href={'#'+id} onClick={event=>navigate(id,event)} aria-current={active===id?'location':undefined}><span className="caption-4">0{index+1}</span>{label}<Arrow /></a>)}
+      <p className="caption-2">Cloud infrastructure. Reliable delivery. Applied AI.</p>
+    </div>}
+  </header>
 }
