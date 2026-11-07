@@ -80,3 +80,15 @@ node scripts/verify-motion.mjs
 ```
 
 This checks real intermediate hero states, one-time scroll reveals, sequential project workflows, packet interpolation, pause/replay, keyboard behavior, reduced motion, responsive overflow, layout shifts, and unchanged content-data hashes. The task's content baseline is saved in ignored artifacts/animation-content-baseline.json. On a clean checkout, establish a baseline before animation edits with `node scripts/verify-motion.mjs --write-baseline`. The general browser harness also supports PREVIEW_URL for checking the production export.
+
+## Background motion verification
+
+The global margin signal system is documented in [docs/BACKGROUND-MOTION.md](docs/BACKGROUND-MOTION.md). It uses sparse inline SVG routes and finite native transform/opacity animation, with static reduced-motion/no-JavaScript output.
+
+With the local portfolio server and headless Chrome on debugging port 9333 running:
+
+```sh
+node scripts/verify-background.mjs
+```
+
+Set PREVIEW_URL when testing another local origin. The check compares 1440, 768, 390, and 320px, records screenshots and active/static frame samples, checks accessibility and cancellation, and verifies content data against the current Git HEAD. Results are written to ignored artifacts/background/.

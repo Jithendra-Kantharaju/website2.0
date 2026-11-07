@@ -13,6 +13,9 @@
 * { box-sizing: border-box; }
 html { color-scheme: dark; scroll-padding-top: 112px; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-sans); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+/* Keep the decorative margin routes below every content surface. */
+body { isolation: isolate; }
+main, .site-footer { position: relative; z-index: 1; }
 h1,h2,h3,h4,h5,p,ol,ul,dl,dd,figure { margin: 0; }
 h1,h2,h3,h4,h5 { text-wrap: balance; }
 p { text-wrap: pretty; }

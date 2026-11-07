@@ -1,4 +1,5 @@
 import localFont from 'next/font/local'
+import SignalBackdrop from '@/components/SignalBackdrop'
 import './globals.css'
 
 const geist = localFont({ src: [
@@ -21,5 +22,5 @@ export const metadata = {
 export const viewport = { width: 'device-width', initialScale: 1, themeColor: '#000000' }
 
 export default function RootLayout({ children }) {
-  return <html lang="en" className={geist.variable}><body>{children}</body></html>
+  return <html lang="en" className={geist.variable}><body><SignalBackdrop />{children}</body></html>
 }
